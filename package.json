@@ -1,6 +1,6 @@
 {
   "name": "litworks",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The tooling and utils required to make an application using lit-elements",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
