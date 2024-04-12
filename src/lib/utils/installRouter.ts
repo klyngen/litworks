@@ -3,7 +3,6 @@
  * https://github.com/Polymer/pwa-helpers
  * */
 
-/* eslint-disable functional/no-return-void */
 export const installRouter = (
     locationUpdatedCallback: (location: Location, event: Event | null) => void
 ) => {
