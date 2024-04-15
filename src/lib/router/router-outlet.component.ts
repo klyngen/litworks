@@ -1,6 +1,6 @@
 import { html, LitElement, TemplateResult } from 'lit';
-import { property, queryAsync } from 'lit/decorators';
-import { customElement } from 'lit/decorators/custom-element';
+import { customElement } from 'lit/decorators/custom-element.js';
+import { property, queryAsync } from 'lit/decorators.js';
 import { Subscription } from 'rxjs';
 
 import { ConstructableObject, NavigationService, Route } from './router';
