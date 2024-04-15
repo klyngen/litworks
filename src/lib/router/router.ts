@@ -7,11 +7,14 @@ export type ImportResult = {
     [key: string]: object;
 };
 
+export type ConstructableObject = {
+    new (): Node;
+};
+
 export type Route = {
     readonly name: string;
     readonly route: RegExp;
-    readonly import?: string;
-    readonly action?: () => Promise<ImportResult>;
+    readonly action?: () => Promise<ImportResult> | ConstructableObject;
     readonly data?: Record<string, unknown>;
 };
 

@@ -3,13 +3,43 @@ import { property, queryAsync } from 'lit/decorators';
 import { customElement } from 'lit/decorators/custom-element';
 import { Subscription } from 'rxjs';
 
-import { ImportResult, NavigationService, Route } from './router';
+import { ConstructableObject, NavigationService, Route } from './router';
 
-export type constructableObject = {
-    new (): Node;
-};
+const ELEMENT_NAME = 'litworks-router-outlet';
 
-@customElement('router-outlet')
+/**
+ * Simple yet powerfull router
+ * You can either have a global Navigation Service or multiple small navigation services, each controlling
+ * a router-outlet
+ *
+ *
+ * ```typescript
+ const navigationService = new NavigationService();
+ navigationService.addRoutes([
+    { // This will lazy load a component
+      name: "Route one",
+      route: /\/one$/,
+      action: () => {
+        return import("./views/test-view/test-view.component");
+      },
+    },
+    { // This will egarly load a component
+      name: "Route two - egarly loaded component",
+      route: /\/two$/,
+      action: () => TestComponent,
+    },
+   { // This will lazy load a component
+      name: "Route three - egarly loaded component with url params",
+      route: /\/products/(?<productId>[0-9]+)$/,
+      action: () => TestComponent,
+    },
+ ]);
+  render() {
+    return html`<litworks-router-outlet .navigationService=${navigationService}></litworks-router-outlet>`;
+  }
+  ```
+ **/
+@customElement(ELEMENT_NAME)
 export class RouterOutlet extends LitElement {
     private readonly subscriptions: Subscription[] = [];
 
@@ -17,16 +47,6 @@ export class RouterOutlet extends LitElement {
     viewContainer: Promise<HTMLDivElement> | undefined;
 
     private _navigationService?: NavigationService;
-    private _routes?: readonly Route[];
-
-    @property({ attribute: false })
-    set routes(items: readonly Route[]) {
-        this._routes = items;
-        if (this._navigationService) {
-            this._navigationService.addRoutes(items);
-            this._routes = undefined;
-        }
-    }
 
     @property({ attribute: false })
     set navigationService(item: NavigationService | undefined) {
@@ -41,10 +61,6 @@ export class RouterOutlet extends LitElement {
                 this.loadView(route);
             })
         );
-        if (this._routes && this._navigationService) {
-            this._navigationService.addRoutes(this._routes);
-            this._routes = undefined;
-        }
     }
 
     get navigationService(): NavigationService | undefined {
@@ -54,14 +70,28 @@ export class RouterOutlet extends LitElement {
     private async loadView(route: Route): Promise<void> {
         if (route && route.action) {
             try {
-                const component: ImportResult = await route.action();
-                this.viewContainer?.then((viewContainer) => {
-                    viewContainer.innerHTML = '';
-                    for (const key of Object.keys(component)) {
-                        const element = component[key] as constructableObject;
-                        viewContainer.appendChild(new element());
-                    }
-                });
+                const actionResult = route.action();
+                // If the route action has all Promise-properties, then we can be certain it is a promise
+                if (
+                    'then' in actionResult &&
+                    'catch' in actionResult &&
+                    'finally' in actionResult
+                ) {
+                    const importResult = await actionResult;
+                    this.viewContainer?.then((viewContainer) => {
+                        viewContainer.innerHTML = '';
+                        for (const key of Object.keys(importResult)) {
+                            const element = importResult[
+                                key
+                            ] as ConstructableObject;
+                            viewContainer.appendChild(new element());
+                        }
+                    });
+                } else {
+                    this.viewContainer?.then((viewContainer) => {
+                        viewContainer.appendChild(new actionResult());
+                    });
+                }
             } catch (e) {
                 console.error(`unable to load view: ${e}`);
             }
@@ -70,5 +100,11 @@ export class RouterOutlet extends LitElement {
 
     render(): TemplateResult {
         return html`<div id="view-container"></div>`;
+    }
+}
+
+declare global {
+    interface HTMLElementTagNameMap {
+        'litworks-router-outlet': RouterOutlet;
     }
 }

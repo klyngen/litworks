@@ -36,7 +36,7 @@ export class AsyncController<T> implements ReactiveController {
     constructor(
         private readonly host: ReactiveControllerHost,
         private readonly source: Observable<T>,
-        private value: T
+        public value: T
     ) {
         this.host.addController(this);
         if (this.value) {
