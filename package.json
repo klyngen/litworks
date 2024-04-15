@@ -1,5 +1,5 @@
 {
-  "name": "litworks",
+  "name": "@klyngen/litworks",
   "version": "1.0.4",
   "description": "The tooling and utils required to make an application using lit-elements",
   "main": "build/main/index.js",
