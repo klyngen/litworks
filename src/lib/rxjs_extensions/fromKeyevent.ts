@@ -21,12 +21,13 @@ interface EventListenerElement<E> {
  * Simple wrapper arround fromEvent to simplify listening to basic keystrokes on an element
  * @param element - Default to window if not specified
  * */
-
 export function fromKeyEvent(
     characters: readonly string[],
     element: EventListenerElement<KeyboardEvent>
-): Observable<string>;
-export function fromKeyEvent(characters: readonly string[]): Observable<string>;
+): Observable<KeyboardEvent>;
+export function fromKeyEvent(
+    characters: readonly string[]
+): Observable<KeyboardEvent>;
 export function fromKeyEvent(
     characters: readonly string[],
     element?: EventListenerElement<KeyboardEvent>
@@ -42,8 +43,8 @@ const createKeyEventObservable = (
     characters: readonly string[]
 ) => {
     return fromEvent<KeyboardEvent>(element, 'keyup').pipe(
-        map((event) => event.key),
-        filter((key) => filterKeyEvent(key, characters))
+        map((event) => event),
+        filter((event) => filterKeyEvent(event.key, characters))
     );
 };
 

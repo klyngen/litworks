@@ -9,3 +9,4 @@ export * from './lib/lit_extensions/async_controller';
 export * from './lib/lit_extensions/async_directive';
 
 export * from './lib/authentication/authentication.service';
+export * from './lib/http/http_client';

@@ -6,6 +6,50 @@ import {
 } from 'lit';
 import { Observable, Subscription } from 'rxjs';
 
+/** Use the async-controller when you want to bind values more complex than a string or a number. Basically when handling arrays or objects. It can be used in tho ways, with value or using a render-function.
+* ``` typescript
+* import { interval } from "rxjs";
+*
+*  \@customElement("test-component")
+*  export class TestComponent extends LitElement {
+*    // Emits every second
+*    private interval$ = interval(1000);
+*
+*    private intervalController = createAsyncController(this, interval$, 0);
+*
+* render() {
+*     return html`<p>Current count: ${this.intervalController.value}</p>`;
+*   }
+* }
+*```
+
+
+* This is a very tidy way of making good frontend code. Here we are handling the various states with just a few linse of code
+* ``` typescript
+* import { interval } from "rxjs";
+*
+* \@customElement("test-component")
+* export class TestComponent extends LitElement {
+*    // Emits every second
+*    private interval$ = interval(1000);
+*
+*    private intervalController = createAsyncController(this, interval$, 0);
+*
+*    render() {
+*      return intervalController.render({
+*        onValue: (value) => html`Yay a value: ${value}`,
+*        onError: (err) => html`Oh s#!%, ${err}`,
+*        initial: () => html`TODO: Implement loading spinner`,
+*        pending: () => html`Loading state`,
+*        // Add onEmpty and an isEmpty function if you want an empty state
+*        onEmpty: () => html`Got an empty response`,
+*        // This function evaluates if a response is empty
+*        isEmpty: (value) => value === null
+*      });
+*    }
+* }
+```
+ * */
 export function createAsyncController<T>(
     host: ReactiveControllerHost,
     observable: Observable<T>
@@ -42,6 +86,12 @@ export class AsyncController<T> implements ReactiveController {
         if (this.value) {
             this.preFirstValue = false;
         }
+    }
+
+    setToPending() {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.value = undefined;
     }
 
     hostConnected() {
